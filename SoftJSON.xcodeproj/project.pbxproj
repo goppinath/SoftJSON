@@ -13,6 +13,8 @@
 		796083121C2D63A7002299A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 796083111C2D63A7002299A3 /* Assets.xcassets */; };
 		796083151C2D63A7002299A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 796083131C2D63A7002299A3 /* LaunchScreen.storyboard */; };
 		796083201C2D63A7002299A3 /* SoftJSONTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7960831F1C2D63A7002299A3 /* SoftJSONTests.swift */; };
+		7960832C1C2D63DA002299A3 /* SoftJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7960832B1C2D63DA002299A3 /* SoftJSON.swift */; };
+		7960832E1C2DA7D5002299A3 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = 7960832D1C2DA7D5002299A3 /* sample.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +38,8 @@
 		7960831B1C2D63A7002299A3 /* SoftJSONTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SoftJSONTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7960831F1C2D63A7002299A3 /* SoftJSONTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftJSONTests.swift; sourceTree = "<group>"; };
 		796083211C2D63A7002299A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7960832B1C2D63DA002299A3 /* SoftJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SoftJSON.swift; sourceTree = "<group>"; };
+		7960832D1C2DA7D5002299A3 /* sample.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sample.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,12 +81,14 @@
 		796083091C2D63A6002299A3 /* SoftJSON */ = {
 			isa = PBXGroup;
 			children = (
+				7960832A1C2D63C3002299A3 /* lib */,
 				7960830A1C2D63A7002299A3 /* AppDelegate.swift */,
 				7960830C1C2D63A7002299A3 /* ViewController.swift */,
 				7960830E1C2D63A7002299A3 /* Main.storyboard */,
 				796083111C2D63A7002299A3 /* Assets.xcassets */,
 				796083131C2D63A7002299A3 /* LaunchScreen.storyboard */,
 				796083161C2D63A7002299A3 /* Info.plist */,
+				7960832D1C2DA7D5002299A3 /* sample.json */,
 			);
 			path = SoftJSON;
 			sourceTree = "<group>";
@@ -94,6 +100,14 @@
 				796083211C2D63A7002299A3 /* Info.plist */,
 			);
 			path = SoftJSONTests;
+			sourceTree = "<group>";
+		};
+		7960832A1C2D63C3002299A3 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				7960832B1C2D63DA002299A3 /* SoftJSON.swift */,
+			);
+			path = lib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -178,6 +192,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				796083151C2D63A7002299A3 /* LaunchScreen.storyboard in Resources */,
+				7960832E1C2DA7D5002299A3 /* sample.json in Resources */,
 				796083121C2D63A7002299A3 /* Assets.xcassets in Resources */,
 				796083101C2D63A7002299A3 /* Main.storyboard in Resources */,
 			);
@@ -198,6 +213,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7960830D1C2D63A7002299A3 /* ViewController.swift in Sources */,
+				7960832C1C2D63DA002299A3 /* SoftJSON.swift in Sources */,
 				7960830B1C2D63A7002299A3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
