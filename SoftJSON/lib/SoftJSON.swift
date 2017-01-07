@@ -96,37 +96,26 @@ struct SoftJSON {
     
     var rawString: String? {
         
+        func rawString(withJSONObject JSONObject: Any) -> String? {
+            
+            do {
+                
+                let JSONData = try JSONSerialization.data(withJSONObject: JSONObject, options: JSONSerialization.WritingOptions.prettyPrinted)
+                
+                let JSONString = String(data: JSONData, encoding: String.Encoding.utf8)
+//                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
+//                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
+                
+                return JSONString
+            }
+            catch { return nil }
+        }
+        
         if let _ = any {
             
             switch content {
-            case ._Object(let dictionary):
-                
-                do {
-                    
-                    let JSONData = try JSONSerialization.data(withJSONObject: dictionary, options: JSONSerialization.WritingOptions.prettyPrinted)
-                    
-                    let JSONString = String(data: JSONData, encoding: String.Encoding.utf8)
-                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
-                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
-                    
-                    return JSONString
-                }
-                catch { }
-                
-            case ._Array(let array):
-                
-                do {
-                    
-                    let JSONData = try JSONSerialization.data(withJSONObject: array, options: JSONSerialization.WritingOptions.prettyPrinted)
-                    
-                    let JSONString = String(data: JSONData, encoding: String.Encoding.utf8)
-                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
-                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
-                    
-                    return JSONString
-                }
-                catch { }
-                
+            case ._Object(let dictionary):  return rawString(withJSONObject: dictionary)
+            case ._Array(let array):        return rawString(withJSONObject: array)
             case ._String(let string):      return string
             case ._Bool(let bool):          return bool.description
             case ._Number(let number):      return number.description
