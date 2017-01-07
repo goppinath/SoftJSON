@@ -23,17 +23,17 @@ struct SoftJSON {
     
     enum JSONContent {
         
-        case _Object([String:AnyObject])
-        case _Array([AnyObject])
+        case _Object([String:Any])
+        case _Array([Any])
         case _String(String)
         case _Bool(Bool)
         case _Number(NSNumber)
         case _Null
     }
     
-    private var content: JSONContent = ._Null
+    fileprivate var content: JSONContent = ._Null
     
-    private var anyObject: AnyObject? {
+    fileprivate var any: Any? {
         
         get {
             
@@ -51,38 +51,40 @@ struct SoftJSON {
             if let anyObject = newValue {
                 
                 switch anyObject {
-                case let object as [String:AnyObject]:  content = ._Object(object)
-                case let array as [AnyObject]:          content = ._Array(array)
-                case let string as String:              content = ._String(string)
-                case let number as NSNumber:            if number.isBool() { content = ._Bool(number.boolValue) } else { content = ._Number(number) }
-                case _ as NSNull:                       content = ._Null
+                case let object as [String:Any]:    content = ._Object(object)
+                case let array as [Any]:            content = ._Array(array)
+                case let string as String:          content = ._String(string)
+                case let number as NSNumber:        if number.isBool() { content = ._Bool(number.boolValue) } else { content = ._Number(number) }
+//                case let bool as Bool:              content = ._Bool(bool)
+//                case let number as NSNumber:        content = ._Number(number)
+                case _ as NSNull:                   content = ._Null
                 default: break
                 }
             }
         }
     }
     
-    private init(anyObject: AnyObject?) {
+    fileprivate init(any: Any?) {
         
-        self.anyObject = anyObject
+        self.any = any
     }
     
-    init(data: NSData, JSONReadingOptions: NSJSONReadingOptions = .AllowFragments) {
+    init(data: Data, JSONReadingOptions: JSONSerialization.ReadingOptions = .allowFragments) {
         
-        var anyObject: AnyObject?
+        var any: Any?
         
-        do { anyObject = try NSJSONSerialization.JSONObjectWithData(data, options: []) }
+        do { any = try JSONSerialization.jsonObject(with: data, options: []) }
         catch { }
         
-        self.init(anyObject: anyObject)
+        self.init(any: any)
     }
     
-    init(dictionary: [String:AnyObject] = [String:AnyObject]()) {
+    init(dictionary: [String:Any] = [String:Any]()) {
         
-        self.init(anyObject: dictionary)
+        self.init(any: dictionary)
     }
     
-    init(value: AnyObject, key: String) {
+    init(value: Any, key: String) {
         
         self.init(dictionary: [key : value])
     }
@@ -94,19 +96,42 @@ struct SoftJSON {
     
     var rawString: String? {
         
-        if let anyObject = anyObject {
+        if let _ = any {
             
-            do {
+            switch content {
+            case ._Object(let dictionary):
                 
-                let JSONData = try NSJSONSerialization.dataWithJSONObject(anyObject, options: NSJSONWritingOptions.PrettyPrinted)
+                do {
+                    
+                    let JSONData = try JSONSerialization.data(withJSONObject: dictionary, options: JSONSerialization.WritingOptions.prettyPrinted)
+                    
+                    let JSONString = String(data: JSONData, encoding: String.Encoding.utf8)
+                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
+                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
+                    
+                    return JSONString
+                }
+                catch { }
                 
-                let JSONString = String(data: JSONData, encoding: NSUTF8StringEncoding)
-//                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
-//                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
+            case ._Array(let array):
                 
-                return JSONString
+                do {
+                    
+                    let JSONData = try JSONSerialization.data(withJSONObject: array, options: JSONSerialization.WritingOptions.prettyPrinted)
+                    
+                    let JSONString = String(data: JSONData, encoding: String.Encoding.utf8)
+                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
+                    //                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
+                    
+                    return JSONString
+                }
+                catch { }
+                
+            case ._String(let string):      return string
+            case ._Bool(let bool):          return bool.description
+            case ._Number(let number):      return number.description
+            case ._Null:                    return nil
             }
-            catch { }
         }
         
         return nil
@@ -123,13 +148,13 @@ extension Int: JSONSubscriptable {}
 
 extension SoftJSON {
     
-    private subscript(index index: Int) -> SoftJSON? {
+    fileprivate subscript(index index: Int) -> SoftJSON? {
         
         get {
             
             switch content {
                 
-            case ._Array(let array) where array.count > index: return SoftJSON.init(anyObject: array[index])
+            case ._Array(let array) where array.count > index: return SoftJSON.init(any: array[index])
             default: return nil;
             }
         }
@@ -139,7 +164,7 @@ extension SoftJSON {
                 
             case ._Array(var array) where array.count > index:
                 
-                if let anObject = newValue?.anyObject {
+                if let anObject = newValue?.any {
                 
                     array[index] = anObject
                 
@@ -152,9 +177,9 @@ extension SoftJSON {
                 
             case ._Null:
                 
-                var array = [AnyObject]()
+                var array = [Any]()
                 
-                if let anObject = newValue?.anyObject {
+                if let anObject = newValue?.any {
                     
                     array[index] = anObject
                     
@@ -170,13 +195,13 @@ extension SoftJSON {
         }
     }
     
-    private subscript(key key: String) -> SoftJSON? {
+    fileprivate subscript(key key: String) -> SoftJSON? {
         
         get {
             
             switch content {
                 
-            case ._Object(let dictionary): if let anyObject = dictionary[key] { return SoftJSON.init(anyObject: anyObject) } else { return nil }
+            case ._Object(let dictionary): if let any = dictionary[key] { return SoftJSON.init(any: any) } else { return nil }
             default: return nil;
             }
         }
@@ -186,7 +211,7 @@ extension SoftJSON {
                 
             case ._Object(var dictionary):
                 
-                if let anObject = newValue?.anyObject {
+                if let anObject = newValue?.any {
                 
                     dictionary[key] = anObject
                 
@@ -199,9 +224,9 @@ extension SoftJSON {
                 
             case ._Null:
                 
-                var dictionary = [String:AnyObject]()
+                var dictionary = [String:Any]()
                 
-                if let anObject = newValue?.anyObject {
+                if let anObject = newValue?.any {
                     
                     dictionary[key] = anObject
                     
@@ -217,7 +242,7 @@ extension SoftJSON {
         }
     }
     
-    private subscript(subscriptable subscriptable: JSONSubscriptable) -> SoftJSON? {
+    fileprivate subscript(subscriptable subscriptable: JSONSubscriptable) -> SoftJSON? {
         
         get {
             
@@ -295,7 +320,7 @@ extension SoftJSON {
                 }
                 else {
                     
-                    var currentTargetJSON = SoftJSON(anyObject: nil)
+                    var currentTargetJSON = SoftJSON(any: nil)
                     
                     currentTargetJSON[restPath] = newValue
                     self[subscriptable: path[0]] = currentTargetJSON
@@ -309,7 +334,7 @@ extension SoftJSON {
 
 extension SoftJSON {
     
-    func dictionaryValue() -> [String:AnyObject]? {
+    func dictionaryValue() -> [String:Any]? {
         
         switch content {
 
@@ -322,7 +347,7 @@ extension SoftJSON {
         
         switch content {
             
-        case ._Array(let array): return array.map() { SoftJSON(anyObject: $0) }
+        case ._Array(let array): return array.map() { SoftJSON(any: $0) }
         default: return nil;
         }
     }
@@ -358,7 +383,7 @@ extension SoftJSON {
         
         switch content {
             
-        case ._Number(let number): return number.integerValue
+        case ._Number(let number): return number.intValue
         default: return nil;
         }
     }
@@ -367,7 +392,7 @@ extension SoftJSON {
         
         switch content {
             
-        case ._Number(let number): return number.unsignedIntegerValue
+        case ._Number(let number): return number.uintValue
         default: return nil;
         }
     }
@@ -395,7 +420,7 @@ extension SoftJSON {
 
 extension SoftJSON {
     
-    mutating func append(JSON: SoftJSON) -> Bool {
+    mutating func append(_ JSON: SoftJSON) -> Bool {
         
         switch (content, JSON.content) {
             
@@ -413,7 +438,7 @@ extension SoftJSON {
         }
     }
     
-    mutating func appendValue(value: AnyObject, forKey: String) -> Bool {
+    mutating func appendValue(_ value: AnyObject, forKey: String) -> Bool {
         
         return self.append(SoftJSON(value: value, key: forKey))
     }
@@ -446,29 +471,29 @@ extension NSNumber {
     
     class func trueNumber() -> NSNumber {
         
-        return NSNumber(bool: true)
+        return NSNumber(value: true as Bool)
     }
     
     class func falseNumber() -> NSNumber {
         
-        return NSNumber(bool: false)
+        return NSNumber(value: false as Bool)
     }
     
     var trueObjCType: String? {
         
-        return String.fromCString(NSNumber.trueNumber().objCType)
+        return String(cString: NSNumber.trueNumber().objCType)
     }
     
     var falseObjCType: String? {
         
-        return String.fromCString(NSNumber.falseNumber().objCType)
+        return String(cString: NSNumber.falseNumber().objCType)
     }
     
     func isBool() -> Bool {
         
-        let objCType = String.fromCString(self.objCType)
+        let objCType = String(cString: self.objCType)
         
-        if self.compare(NSNumber.trueNumber()) == .OrderedSame && objCType == trueObjCType || self.compare(NSNumber.falseNumber()) == .OrderedSame && objCType == falseObjCType {
+        if self.compare(NSNumber.trueNumber()) == .orderedSame && objCType == trueObjCType || self.compare(NSNumber.falseNumber()) == .orderedSame && objCType == falseObjCType {
             
             return true
         }

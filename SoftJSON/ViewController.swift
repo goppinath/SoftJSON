@@ -14,15 +14,15 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        if let file = NSBundle(forClass: ViewController.self).pathForResource("sample", ofType: "json"), let data = NSData(contentsOfFile: file) {
+        if let file = Bundle(for: ViewController.self).path(forResource: "sample", ofType: "json"), let data = try? Data(contentsOf: URL(fileURLWithPath: file)) {
             
             var JSON = SoftJSON(data: data)
             
-            print(JSON["widget"]?["justABool"])
+            print(JSON["widget"]?["justABool"] ?? "Nothing")
             
             JSON["widget"] = SoftJSON(dictionary: ["justABool": false])
             
-            print(JSON["widget"]?["justABool"])
+            print(JSON["widget"]?["justABool"] ?? "Nothing")
         }
     }
 
