@@ -77,9 +77,39 @@ struct SoftJSON {
         self.init(anyObject: anyObject)
     }
     
-    init(dictionary: [String:AnyObject]) {
+    init(dictionary: [String:AnyObject] = [String:AnyObject]()) {
         
         self.init(anyObject: dictionary)
+    }
+    
+    init(value: AnyObject, key: String) {
+        
+        self.init(dictionary: [key : value])
+    }
+    
+//    func rawData(JSONWritingOptions: NSJSONWritingOptions = .PrettyPrinted) throws -> NSData? {
+//
+//        return try NSJSONSerialization.dataWithJSONObject(anyObject, options:JSONWritingOptions)
+//    }
+    
+    var rawString: String? {
+        
+        if let anyObject = anyObject {
+            
+            do {
+                
+                let JSONData = try NSJSONSerialization.dataWithJSONObject(anyObject, options: NSJSONWritingOptions.PrettyPrinted)
+                
+                let JSONString = String(data: JSONData, encoding: NSUTF8StringEncoding)
+//                JSONString = JSONString?.stringByReplacingOccurrencesOfString("\n", withString: "")
+//                JSONString = JSONString?.stringByReplacingOccurrencesOfString(" ", withString: "")
+                
+                return JSONString
+            }
+            catch { }
+        }
+        
+        return nil
     }
 }
 
@@ -288,11 +318,11 @@ extension SoftJSON {
         }
     }
     
-    func arrayValue() -> [AnyObject]? {
+    func arrayValue() -> [SoftJSON]? {
         
         switch content {
             
-        case ._Array(let array): return array
+        case ._Array(let array): return array.map() { SoftJSON(anyObject: $0) }
         default: return nil;
         }
     }
@@ -333,6 +363,15 @@ extension SoftJSON {
         }
     }
     
+    func unsignedIntValue() -> UInt? {
+        
+        switch content {
+            
+        case ._Number(let number): return number.unsignedIntegerValue
+        default: return nil;
+        }
+    }
+    
     func floatValue() -> Float? {
         
         switch content {
@@ -342,13 +381,63 @@ extension SoftJSON {
         }
     }
     
-    func doubleValue() -> NSNumber? {
+    func doubleValue() -> Double? {
         
         switch content {
             
         case ._Number(let number): return number.doubleValue
         default: return nil;
         }
+    }
+}
+
+// MARK:- Safe Setters
+
+extension SoftJSON {
+    
+    mutating func append(JSON: SoftJSON) -> Bool {
+        
+        switch (content, JSON.content) {
+            
+        case (._Object(var selfDictionary), ._Object(let dictionary)):
+            
+            for (key, value) in dictionary {
+                
+                selfDictionary[key] = value
+            }
+            
+            content = ._Object(selfDictionary)
+            
+            return true
+        default: return false;
+        }
+    }
+    
+    mutating func appendValue(value: AnyObject, forKey: String) -> Bool {
+        
+        return self.append(SoftJSON(value: value, key: forKey))
+    }
+}
+
+// MARK:- Printable
+
+extension SoftJSON: CustomStringConvertible, CustomDebugStringConvertible {
+    
+    var description: String {
+        
+        if let rawString = rawString {
+            
+            return rawString
+        }
+        else {
+            
+            return "Unknown JSON"
+        }
+    }
+    
+    var debugDescription: String {
+        
+        return description
     }
 }
 
